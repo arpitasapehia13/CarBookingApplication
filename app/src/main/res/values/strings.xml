@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">MyCabBooking</string>
+    <string name="how_is_your_trip">How is your trip?</string>
+    <string name="text_drop_off">text_drop_off</string>
+    <string name="text_pick_up">text_pick_up</string>
+    <string name="btn_call">btn_call</string>
+    <string name="btn_message">btn_message</string>
+    <string name="logout">Logout</string>
+    <string name="customer_home">Customer Home</string>
+    <string name="google_maps_key">google_maps_key\n</string>
 </resources>

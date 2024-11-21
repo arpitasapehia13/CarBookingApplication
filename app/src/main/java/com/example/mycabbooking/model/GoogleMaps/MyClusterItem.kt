@@ -1,33 +1,29 @@
-package com.example.cabbooking.model.GoogleMaps
+package com.example.mycabbooking.model.GoogleMaps
 
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.maps.android.clustering.ClusterItem
 
-/**
- * ClusterItem class
- */
-class MyClusterItem(lat: Double, lng: Double, iconBitMapDescriptor: BitmapDescriptor) :
-    ClusterItem {
-    private val position: LatLng
-    val title: String
-    val snippet: String
-    private val iconBitMapDescriptor: BitmapDescriptor
-
-    init {
-        position = LatLng(lat, lng)
-        this.title = "cc"
-        this.snippet = "cl"
-        //        this.title = site.getSiteName();
-//        this.snippet = site.getSiteName();;
-        this.iconBitMapDescriptor = iconBitMapDescriptor
-    }
+class MyClusterItem(
+    private val position: LatLng,
+    private val title: String,
+    private val snippet: String,
+    private val icon: BitmapDescriptor
+) : ClusterItem {
 
     override fun getPosition(): LatLng {
         return position
     }
 
+    override fun getTitle(): String {
+        return title
+    }
+
+    override fun getSnippet(): String {
+        return snippet
+    }
+
     fun getIconBitMapDescriptor(): BitmapDescriptor {
-        return iconBitMapDescriptor
+        return icon
     }
 }

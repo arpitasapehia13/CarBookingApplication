@@ -2,14 +2,16 @@ package com.example.mycabbooking.ui.customer.booking.popup_driver_arrived
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
-import com.example.cabbooking.R
-import com.example.cabbooking.model.User
+import androidx.lifecycle.ViewModelProvider
+import com.example.mycabbooking.R
+import com.example.mycabbooking.model.User
 
 class PopupDriverArrivalFragment : DialogFragment() {
     private var mViewModel: PopupDriverArrivalViewModel? = null
@@ -53,12 +55,11 @@ class PopupDriverArrivalFragment : DialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProvider(requireActivity()).get<PopupDriverArrivalViewModel>(
-            PopupDriverArrivalViewModel::class.java
-        )
-        mViewModel!!.driver.observe(viewLifecycleOwner, object : Observer<User?> {
-            override fun onChanged(user: User) {
-                setDriverInfo(user)
+        mViewModel = ViewModelProvider(requireActivity()).get<PopupDriverArrivalViewModel>(PopupDriverArrivalViewModel::class.java)
+        mViewModel!!.driver.observe(viewLifecycleOwner, Observer<User?> { user ->
+            // Check if the user is not null before passing it to setDriverInfo
+            user?.let {
+                setDriverInfo(it)
             }
         })
     }

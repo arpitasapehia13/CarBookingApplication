@@ -4,10 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.mycabbooking.MainActivity
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
+
     var backBtn: Button? = null
     var loginBtn: Button? = null
     var emailEditText: EditText? = null
@@ -24,21 +31,21 @@ class LoginActivity : AppCompatActivity() {
         setLoginBtnAction()
     }
 
-    //Get View variables from xml id
+    // Get View variables from XML id
     private fun linkViewElements() {
-        loginBtn = findViewById<Button>(R.id.loginLoginBtn)
-        emailEditText = findViewById<EditText>(R.id.loginEmailEditText)
-        passwordEditText = findViewById<EditText>(R.id.loginPasswordEditText)
-        moveToRegister = findViewById<TextView>(R.id.moveToRegisterTextView)
+        loginBtn = findViewById(R.id.loginLoginBtn)
+        emailEditText = findViewById(R.id.loginEmailEditText)
+        passwordEditText = findViewById(R.id.loginPasswordEditText)
+        moveToRegister = findViewById(R.id.moveToRegisterTextView)
     }
 
-    //Login process when clicking 'login' button
+    // Login process when clicking 'login' button
     private fun setLoginBtnAction() {
         loginBtn!!.setOnClickListener(View.OnClickListener {
-            val email: String = emailEditText.getText().toString()
-            val password: String = passwordEditText.getText().toString()
+            val email: String = emailEditText?.text.toString()
+            val password: String = passwordEditText?.text.toString()
 
-            //Check if the input email or password is empty
+            // Check if the input email or password is empty
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(
                     this@LoginActivity,
@@ -48,18 +55,18 @@ class LoginActivity : AppCompatActivity() {
                 return@OnClickListener
             }
 
-            //Call FirebaseAuth for authentication process
-            mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(
+            // Call FirebaseAuth for authentication process
+            mAuth?.signInWithEmailAndPassword(email, password)
+                ?.addOnCompleteListener(
                     this@LoginActivity,
-                    OnCompleteListener<Any?> { task ->
+                    OnCompleteListener<AuthResult> { task ->  // Corrected the OnCompleteListener type
                         if (task.isSuccessful) {
                             Toast.makeText(
                                 this@LoginActivity,
                                 Constants.ToastMessage.signInSuccess,
                                 Toast.LENGTH_SHORT
                             ).show()
-                            moveToHomePage() //Move to HomeActivity
+                            moveToHomePage() // Move to HomeActivity
                         } else {
                             Toast.makeText(
                                 this@LoginActivity,
@@ -71,23 +78,18 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    //Move to user's homepage if successfully logged in
+    // Move to user's homepage if successfully logged in
     private fun moveToHomePage() {
-        val i: Intent = Intent(
-            this@LoginActivity,
-            MainActivity::class.java
-        )
-        i.putExtra("email", emailEditText.getText().toString())
+        val i = Intent(this@LoginActivity, MainActivity::class.java)
+        i.putExtra("email", emailEditText?.text.toString())
         startActivity(i)
         finish()
     }
 
+    // Set action to move to RegisterActivity when clicking the register text
     private fun setRegisterTextViewAction() {
         moveToRegister!!.setOnClickListener {
-            val i: Intent = Intent(
-                this@LoginActivity,
-                RegisterActivity::class.java
-            )
+            val i = Intent(this@LoginActivity, RegisterActivity::class.java)
             startActivity(i)
             finish()
         }

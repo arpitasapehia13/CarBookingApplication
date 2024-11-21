@@ -3,14 +3,27 @@ package com.example.mycabbooking.ui.customer.booking.popup_driver_info
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
-import com.example.cabbooking.Constants
-import com.example.cabbooking.model.User
+import androidx.lifecycle.ViewModelProvider
+import com.example.mycabbooking.Constants
+import com.example.mycabbooking.R
+import com.example.mycabbooking.model.User
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.squareup.picasso.Picasso
 
 class PopupDriverInfoFragment : DialogFragment() {
     private var mViewModel: PopupDriverInfoViewModel? = null
@@ -20,7 +33,7 @@ class PopupDriverInfoFragment : DialogFragment() {
     private var ratingBar: RatingBar? = null
     private var profileImage: ImageView? = null
 
-    //Firestore instances
+    // Firestore instances
     private var mAuth: FirebaseAuth? = null
     private var db: FirebaseFirestore? = null
     private var currentUser: FirebaseUser? = null
@@ -36,8 +49,8 @@ class PopupDriverInfoFragment : DialogFragment() {
         linkViewElements(view)
         mAuth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-        currentUser = mAuth.getCurrentUser()
-        mStorageRef = FirebaseStorage.getInstance().getReference()
+        currentUser = mAuth?.currentUser
+        mStorageRef = FirebaseStorage.getInstance().reference
 
         return view
     }
@@ -47,10 +60,10 @@ class PopupDriverInfoFragment : DialogFragment() {
      * @param rootView
      */
     private fun linkViewElements(rootView: View) {
-        driverUsernameTextView = rootView.findViewById<TextView>(R.id.driverUsernameTextView)
-        plateNumberAndBike = rootView.findViewById<TextView>(R.id.plateNumberAndBike)
-        ratingBar = rootView.findViewById<RatingBar>(R.id.ratingBar)
-        profileImage = rootView.findViewById<ImageView>(R.id.profile_avatar)
+        driverUsernameTextView = rootView.findViewById(R.id.driverUsernameTextView)
+        plateNumberAndBike = rootView.findViewById(R.id.plateNumberAndBike)
+        ratingBar = rootView.findViewById(R.id.ratingBar)
+        profileImage = rootView.findViewById(R.id.profile_avatar)
     }
 
     /**
@@ -58,38 +71,39 @@ class PopupDriverInfoFragment : DialogFragment() {
      */
     @SuppressLint("SetTextI18n")
     private fun setDriverInfo() {
-        driverUsernameTextView!!.text = driver!!.username
-        plateNumberAndBike!!.text =
-            driver!!.vehiclePlateNumber + " ● " + driver!!.transportationType
-        ratingBar.setRating(getRatingAverage(driver!!))
+        driverUsernameTextView?.text = driver?.username
+        plateNumberAndBike?.text = "${driver?.vehiclePlateNumber} ● ${driver?.transportationType}"
+        ratingBar?.rating = getRatingAverage(driver!!)
         setProfileImage()
     }
 
     private fun setProfileImage() {
-        db.collection(Constants.FSUser.userCollection)
-            .whereEqualTo(Constants.FSUser.emailField, driver!!.email)
-            .get()
-            .addOnSuccessListener(object : OnSuccessListener<QuerySnapshot?>() {
+        db?.collection(Constants.FSUser.userCollection)
+            ?.whereEqualTo(Constants.FSUser.emailField, driver?.email)
+            ?.get()
+            ?.addOnSuccessListener(object : OnSuccessListener<QuerySnapshot> {
                 override fun onSuccess(queryDocumentSnapshots: QuerySnapshot) {
                     for (doc in queryDocumentSnapshots) {
                         val driver: User = doc.toObject(User::class.java)
 
-                        //                            assert driver != null;
-                        val fref: StorageReference =
-                            mStorageRef.child("profileImages").child(driver.docId + ".jpeg")
+                        val fref: StorageReference? =
+                            mStorageRef?.child("profileImages")?.child("${driver.docId}.jpeg")
 
-                        fref.getDownloadUrl()
-                            .addOnSuccessListener(object : OnSuccessListener<Uri?>() {
+                        fref?.getDownloadUrl()
+                            ?.addOnSuccessListener(object : OnSuccessListener<Uri?> {
                                 override fun onSuccess(uri: Uri?) {
                                     Picasso.get().load(uri).into(profileImage)
                                 }
-                            }).addOnFailureListener(object : OnFailureListener() {
+                            })?.addOnFailureListener(object : OnFailureListener {
                                 override fun onFailure(exception: Exception) {
+                                    // Handle failure here if needed
                                 }
                             })
                     }
                 }
-            })
+            })?.addOnFailureListener { exception ->
+                // Handle failure of the Firestore query
+            }
     }
 
     fun getRatingAverage(driver: User): Float {
@@ -102,14 +116,13 @@ class PopupDriverInfoFragment : DialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProvider(requireActivity()).get<PopupDriverInfoViewModel>(
-            PopupDriverInfoViewModel::class.java
-        )
-        mViewModel!!.driver.observe(viewLifecycleOwner, object : Observer<User?> {
-            override fun onChanged(user: User) {
-                driver = user
-                setDriverInfo()
-            }
+        mViewModel = ViewModelProvider(requireActivity()).get(PopupDriverInfoViewModel::class.java)
+
+        // Observe the driver LiveData
+        mViewModel?.driver?.observe(viewLifecycleOwner, Observer {
+            // Ensure user is not null before accessing it
+            driver = it
+            setDriverInfo() // Set the driver info when data changes
         })
     }
 

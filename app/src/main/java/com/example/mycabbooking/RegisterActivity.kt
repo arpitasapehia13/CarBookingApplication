@@ -2,10 +2,19 @@ package com.example.mycabbooking
 
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
+import android.widget.DatePicker
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import java.util.Calendar
 import kotlin.math.max
 import kotlin.math.min
@@ -62,18 +71,18 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun setRoleGroupBtnActionHandler() {
-        roleGroup.setOnCheckedChangeListener(object : RadioGroup.OnCheckedChangeListener {
+        roleGroup?.setOnCheckedChangeListener(object : RadioGroup.OnCheckedChangeListener {
             @SuppressLint("NonConstantResourceId")
             override fun onCheckedChanged(group: RadioGroup, checkedId: Int) {
                 when (checkedId) {
                     R.id.registerCustomerRadioBtn -> {
-                        transportationTypeGroup.setVisibility(View.INVISIBLE)
-                        registerVehiclePlateNumberEditText.setVisibility(View.INVISIBLE)
+                        transportationTypeGroup?.setVisibility(View.INVISIBLE)
+                        registerVehiclePlateNumberEditText?.setVisibility(View.INVISIBLE)
                     }
 
                     R.id.registerDriverRadioBtn -> {
-                        transportationTypeGroup.setVisibility(View.VISIBLE)
-                        registerVehiclePlateNumberEditText.setVisibility(View.VISIBLE)
+                        transportationTypeGroup?.setVisibility(View.VISIBLE)
+                        registerVehiclePlateNumberEditText?.setVisibility(View.VISIBLE)
                     }
                 }
             }
@@ -97,17 +106,17 @@ class RegisterActivity : AppCompatActivity() {
     //Move to RegisterFinalActivity when pressing 'next', also passing inputted data of user
     private fun setNextBtnAction() {
         nextBtn!!.setOnClickListener {
-            val username: String = usernameEditText.getText().toString()
-            val phone: String = phoneEditText.getText().toString()
-            val birthDate: String = birthDateEditText.getText().toString()
-            val gender = if (maleRadioBtn.isChecked()) "Male" else "Female"
-            val role = if (customerRadioBtn.isChecked()) "Customer" else "Driver"
+            val username: String = usernameEditText?.getText().toString()
+            val phone: String = phoneEditText?.getText().toString()
+            val birthDate: String = birthDateEditText?.getText().toString()
+            val gender = if (maleRadioBtn?.isChecked() == true) "Male" else "Female"
+            val role = if (customerRadioBtn?.isChecked() == true) "Customer" else "Driver"
             var transportationType = ""
-            if (driverRadioBtn.isChecked()) {
-                transportationType = if (registerCarRadioBtn.isChecked()) "car" else "bike"
+            if (driverRadioBtn?.isChecked() == true) {
+                transportationType = if (registerCarRadioBtn?.isChecked() == true) "car" else "bike"
             }
             val vehiclePlateNumber: String =
-                registerVehiclePlateNumberEditText.getText().toString()
+                registerVehiclePlateNumberEditText?.getText().toString()
 
             //Check empty input
             if (checkEmptyInput(username, phone, birthDate)) {
@@ -159,7 +168,7 @@ class RegisterActivity : AppCompatActivity() {
         datePickerBtn!!.setOnClickListener {
             val datePickerDialog: DatePickerDialog = DatePickerDialog(
                 datePickerBtn!!.context,
-                object : OnDateSetListener {
+                object : DatePickerDialog.OnDateSetListener {
                     @SuppressLint("SetTextI18n")
                     override fun onDateSet(
                         view: DatePicker,
@@ -167,7 +176,7 @@ class RegisterActivity : AppCompatActivity() {
                         monthOfYear: Int,
                         dayOfMonth: Int
                     ) {
-                        birthDateEditText.setText(dayOfMonth.toString() + "/" + (monthOfYear + 1) + "/" + year)
+                        birthDateEditText?.setText(dayOfMonth.toString() + "/" + (monthOfYear + 1) + "/" + year)
                     }
                 }, year, month, day
             )
@@ -177,7 +186,7 @@ class RegisterActivity : AppCompatActivity() {
 
     //Validation after input birth date in the edit text
     private fun setBirthDateEditTextAutoFormat() {
-        birthDateEditText.addTextChangedListener(object : TextWatcher {
+        birthDateEditText?.addTextChangedListener(object : TextWatcher {
             private var curDateStr = ""
             private val calendar: Calendar = Calendar.getInstance()
             private val tempYear = calendar[Calendar.YEAR]
@@ -251,12 +260,12 @@ class RegisterActivity : AppCompatActivity() {
                     //Set date string as text in the EditText view and set the cursor position, update current date string
                     cursorPos = max(cursorPos.toDouble(), 0.0).toInt()
                     curDateStr = curDateStrAfterChangedWithoutSlash
-                    birthDateEditText.setText(curDateStr)
-                    birthDateEditText.setSelection(
+                    birthDateEditText?.setText(curDateStr)
+                    birthDateEditText?.setSelection(
                         min(
                             cursorPos.toDouble(),
                             curDateStr.length.toDouble()
-                        )
+                        ).toInt()
                     )
                 }
             }

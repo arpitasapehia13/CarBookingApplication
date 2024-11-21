@@ -2,7 +2,7 @@ package com.example.mycabbooking.ui.customer.booking.checkout
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.cabbooking.model.User
+import com.example.mycabbooking.model.User
 
 /**
  * View model for CheckoutFragment

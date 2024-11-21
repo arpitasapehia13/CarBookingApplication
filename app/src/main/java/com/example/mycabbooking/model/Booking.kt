@@ -14,7 +14,7 @@ class Booking {
     var pickUpPlaceLongitude: Double? = null
     var dropOffPlaceLatitude: Double? = null
     var dropOffPlaceLongitude: Double? = null
-    private var driver: com.example.cabbooking.model.User? = null
+    private var driver: com.example.mycabbooking.model.User? = null
     var distanceInKm: String? = null
     var priceInVND: String? = null
     var transportationType: String? = null
@@ -32,7 +32,7 @@ class Booking {
         pickUpPlaceLongitude: Double?,
         dropOffPlaceLatitude: Double?,
         dropOffPlaceLongitude: Double?,
-        driver: com.example.cabbooking.model.User?,
+        driver: com.example.mycabbooking.model.User?,
         distanceInKm: String?,
         priceInVND: String?,
         transportationType: String?,
@@ -56,11 +56,11 @@ class Booking {
         this.finished = finished
     }
 
-    fun getDriver(): com.example.cabbooking.model.User? {
+    fun getDriver(): com.example.mycabbooking.model.User? {
         return driver
     }
 
-    fun setDriver(driver: com.example.cabbooking.model.User?) {
+    fun setDriver(driver: com.example.mycabbooking.model.User?) {
         this.driver = driver
     }
 }

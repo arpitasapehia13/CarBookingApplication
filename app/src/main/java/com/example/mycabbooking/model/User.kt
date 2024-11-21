@@ -1,4 +1,4 @@
-package com.example.cabbooking.model
+package com.example.mycabbooking.model
 
 import com.google.firebase.firestore.DocumentId
 import java.util.Date

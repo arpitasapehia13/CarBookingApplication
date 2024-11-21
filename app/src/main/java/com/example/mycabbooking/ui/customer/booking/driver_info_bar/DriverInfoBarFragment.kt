@@ -1,17 +1,27 @@
 package com.example.mycabbooking.ui.customer.booking.driver_info_bar
 
-import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.example.cabbooking.Constants
-import com.example.cabbooking.model.User
+import androidx.lifecycle.ViewModelProvider
+import com.example.mycabbooking.Constants
+import com.example.mycabbooking.R
+import com.example.mycabbooking.model.User
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
 class DriverInfoBarFragment : Fragment() {
+
     private var mViewModel: DriverInfoBarViewModel? = null
 
     private var driverUsernameTextView: TextView? = null
@@ -20,7 +30,7 @@ class DriverInfoBarFragment : Fragment() {
     private var ratingBar: RatingBar? = null
     private var profileImage: ImageView? = null
 
-    //Firestore instances
+    // Firestore instances
     private var mAuth: FirebaseAuth? = null
     private var db: FirebaseFirestore? = null
     private var currentUser: FirebaseUser? = null
@@ -36,8 +46,8 @@ class DriverInfoBarFragment : Fragment() {
         linkViewElement(view)
         mAuth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-        currentUser = mAuth.getCurrentUser()
-        mStorageRef = FirebaseStorage.getInstance().getReference()
+        currentUser = mAuth!!.currentUser
+        mStorageRef = FirebaseStorage.getInstance().reference
         return view
     }
 
@@ -46,12 +56,11 @@ class DriverInfoBarFragment : Fragment() {
      * @param rootView
      */
     private fun linkViewElement(rootView: View) {
-        driverUsernameTextView = rootView.findViewById<TextView>(R.id.driverUsernameTextView)
-        plateNumberTextView = rootView.findViewById<TextView>(R.id.plateNumberTextView)
-        transportationTypeTextView =
-            rootView.findViewById<TextView>(R.id.transportationTypeTextView)
-        ratingBar = rootView.findViewById<RatingBar>(R.id.score_rating_bar)
-        profileImage = rootView.findViewById<ImageView>(R.id.profile_avatar)
+        driverUsernameTextView = rootView.findViewById(R.id.driverUsernameTextView)
+        plateNumberTextView = rootView.findViewById(R.id.plateNumberTextView)
+        transportationTypeTextView = rootView.findViewById(R.id.transportationTypeTextView)
+        ratingBar = rootView.findViewById(R.id.score_rating_bar)
+        profileImage = rootView.findViewById(R.id.profile_avatar)
     }
 
     /**
@@ -62,40 +71,41 @@ class DriverInfoBarFragment : Fragment() {
         driverUsernameTextView!!.text = driver.username
         plateNumberTextView!!.text = driver.vehiclePlateNumber
         transportationTypeTextView!!.text = driver.transportationType
-        ratingBar.setRating(getRatingAverage(driver))
-        setProfileImage()
+        ratingBar?.rating = getRatingAverage(driver)
+        setProfileImage(driver)
     }
 
     /**
      * Get driver profile image
      */
-    private fun setProfileImage() {
+    private fun setProfileImage(driver: User) {
         // Retrieve driver information
-        db.collection(Constants.FSUser.userCollection)
-            .whereEqualTo(Constants.FSUser.emailField, driver!!.email)
-            .get()
-            .addOnSuccessListener(object : OnSuccessListener<QuerySnapshot?>() {
-                override fun onSuccess(queryDocumentSnapshots: QuerySnapshot) {
-                    for (doc in queryDocumentSnapshots) {
-                        val driver: User = doc.toObject(User::class.java)
+        db?.collection(Constants.FSUser.userCollection)
+            ?.whereEqualTo(Constants.FSUser.emailField, driver.email)
+            ?.get()
+            ?.addOnSuccessListener { queryDocumentSnapshots: QuerySnapshot ->
+                for (doc in queryDocumentSnapshots) {
+                    val driverFromDb: User? = doc.toObject(User::class.java)
 
-                        //                            assert driver != null;
+                    if (driverFromDb != null) {
                         // Get image URI
                         val fref: StorageReference =
-                            mStorageRef.child("profileImages").child(driver.docId + ".jpeg")
+                            mStorageRef?.child("profileImages")?.child(driverFromDb.docId + ".jpeg")!!
 
                         fref.getDownloadUrl()
-                            .addOnSuccessListener(object : OnSuccessListener<Uri?>() {
-                                override fun onSuccess(uri: Uri?) {
-                                    Picasso.get().load(uri).into(profileImage)
-                                }
-                            }).addOnFailureListener(object : OnFailureListener() {
-                                override fun onFailure(exception: Exception) {
-                                }
-                            })
+                            .addOnSuccessListener { uri ->
+                                // Load image into ImageView
+                                profileImage?.setImageURI(uri)
+                            }
+                            .addOnFailureListener { exception ->
+                                // Handle failure here
+                            }
                     }
                 }
-            })
+            }
+            ?.addOnFailureListener { exception ->
+                // Handle failure here
+            }
     }
 
     /**
@@ -105,23 +115,24 @@ class DriverInfoBarFragment : Fragment() {
      */
     fun getRatingAverage(driver: User): Float {
         var total = 0.0
-        for (_rating in driver.rating!!) {
-            total += _rating.toDouble()
+        val ratingList = driver.rating
+        if (ratingList != null && ratingList.isNotEmpty()) {
+            for (_rating in ratingList) {
+                total += _rating.toDouble()
+            }
+            return (total / ratingList.size).toFloat()
         }
-        return (total / driver.rating!!.size).toFloat()
+        return 0f
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProvider(requireActivity()).get<DriverInfoBarViewModel>(
-            DriverInfoBarViewModel::class.java
-        )
-        mViewModel!!.driver.observe(viewLifecycleOwner, object : Observer<User?> {
-            override fun onChanged(user: User) {
-                driver = user
-                setDriverInfo(user)
-            }
-        })
+        mViewModel = ViewModelProvider(requireActivity()).get(DriverInfoBarViewModel::class.java)
+        mViewModel!!.driver.observe(viewLifecycleOwner, Observer({
+
+            this.driver = it
+            setDriverInfo(it)
+        }))
     }
 
     companion object {

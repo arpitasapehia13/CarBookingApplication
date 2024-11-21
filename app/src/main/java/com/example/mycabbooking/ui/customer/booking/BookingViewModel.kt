@@ -1,7 +1,9 @@
 package com.example.mycabbooking.ui.customer.booking
 
-import com.example.cabbooking.model.User
-import com.google.android.libraries.places.api.model.Place
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.example.mycabbooking.model.User
+import com.google.android.libraries.places.api.model.Place  // Correct import
 
 /**
  * View model for BookingFragment
@@ -11,8 +13,8 @@ class BookingViewModel : ViewModel() {
     private val customerSelectedDropOffPlace: MutableLiveData<Place>
     private val customerSelectedPickupPlace: MutableLiveData<Place>
     private val transportationType: MutableLiveData<String>
-    private val bookBtnPressed: MutableLiveData<Boolean>
-    private val cancelBookingBtnPressed: MutableLiveData<Boolean>
+    val bookBtnPressed: MutableLiveData<Boolean>
+    val cancelBookingBtnPressed: MutableLiveData<Boolean>
     private val feedBackRating: MutableLiveData<Int>
 
     init {
@@ -37,11 +39,11 @@ class BookingViewModel : ViewModel() {
         this.currentUserObject.setValue(currentUserObject)
     }
 
-    fun setCustomerSelectedDropOffPlace(customerSelectedDropOffPlace: Place?) {
+    fun setCustomerSelectedDropOffPlace(customerSelectedDropOffPlace: Place) {  // Corrected here
         this.customerSelectedDropOffPlace.setValue(customerSelectedDropOffPlace)
     }
 
-    fun setCustomerSelectedPickupPlace(customerSelectedPickupPlace: Place?) {
+    fun setCustomerSelectedPickupPlace(customerSelectedPickupPlace: Place?) {  // Corrected here
         this.customerSelectedPickupPlace.setValue(customerSelectedPickupPlace)
     }
 
